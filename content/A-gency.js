@@ -77,7 +77,7 @@ function listener(request) {
       break;
     case "LoadTemp":
       return LoadTemp()
-      break;
+
     default:
   }
 }
@@ -89,7 +89,6 @@ function InfoRegion() {
 }
 
 function InfoCountry(CountryIDInfo) {
-  console.log(CountryIDInfo);
   d = new FormData();
   d.append('SearchRequest', CountryIDInfo);
   d.append('GridLayout', "False");
@@ -113,7 +112,6 @@ function InfoCountry(CountryIDInfo) {
   }).then((text) => {
     var parser = new DOMParser()
     var doc = parser.parseFromString(text, "text/html");
-    console.log(doc.querySelector('.date').innerHTML);
     return doc.querySelector('.date').innerHTML
   })
 }
@@ -162,35 +160,74 @@ function LoadTemp() {
     var item = eArr.next().value
     resarr[item[0]] = item[1]
   })
-  console.log(resarr);
-  return getFormData("https://" + DomenUrl + ".advance-docs.ru/Contractor/Edit/" + resarr.ApplicantID, "frmContractor")
-    .then((obj) => {
-      resarr.Applicant = obj
-      console.log(resarr);
-      return InfoCountry(resarr.Applicant.CountryIDInfo).then((value) => {
+  resarr.typeDocument = document.querySelector('.col-xs-14 input.form-control').value
+  resarr.nameOrgan = document.querySelector('.col-xs-19 input.form-control').value
 
-        resarr.Applicant.CountryInfo = value
-      }).then(() => {
-        return getFormData("https://" + DomenUrl + ".advance-docs.ru/Contractor/Edit/" + resarr.ManufacturerID, "frmContractor")
-      });
-    }).then((obj) => {
-      resarr.Manufacturer = obj
-      return InfoCountry(resarr.Manufacturer.CountryIDInfo).then((value) => {
-        resarr.Manufacturer.CountryInfo = value
-      })
 
-    }).then(() => {
-      console.log(resarr);
-      return browser.storage.local.set({
-        tempDoc: resarr
-      })
-    }).then(() => {
-      var allmsg = [{
-        message: "Данные : " + document.querySelector('#Id').value + " документа загружены в память",
-        class: "success"
-      }]
-      return allmsg
+  return fetch("https://" + DomenUrl + ".advance-docs.ru/Agency", {
+    method: 'GET',
+    credentials: 'include'
+  }).then((response) => {
+    return response.text()
+  }).then((text) => {
+    var parser = new DOMParser()
+    var agen = parser.parseFromString(text, "text/html");
+    var i = agen.querySelectorAll("a.edit.edit-title")
+    var res = ""
+    i.forEach(item => {
+      if (item.firstChild.data == resarr.nameOrgan) {
+        res = item.getAttribute("data-id")
+      }
     })
+    return res
+  }).then((id) => {
+    return fetch("https://" + DomenUrl + ".advance-docs.ru/Agency/Edit/" + id, {
+      method: 'GET',
+      credentials: 'include'
+    })
+  }).then((response) => {
+    return response.text()
+  }).then((text) => {
+    var parser = new DOMParser()
+    var agen = parser.parseFromString(text, "text/html");
+
+    var agenforma = agen.querySelector('#agency_form');
+    var agenfrmd = new FormData(agenforma);
+    var ageneArr = agenfrmd.entries();
+    var agenresarr = {}
+    agenfrmd.forEach(() => {
+      var item = ageneArr.next().value
+      agenresarr[item[0]] = item[1]
+    })
+    resarr.fullinfoOrgan = agenresarr
+    return
+  }).then(() => {
+    return getFormData("https://" + DomenUrl + ".advance-docs.ru/Contractor/Edit/" + resarr.ApplicantID, "frmContractor")
+  }).then((obj) => {
+    resarr.Applicant = obj
+    return InfoCountry(resarr.Applicant.CountryIDInfo).then((value) => {
+      resarr.Applicant.CountryInfo = value
+    }).then(() => {
+      return getFormData("https://" + DomenUrl + ".advance-docs.ru/Contractor/Edit/" + resarr.ManufacturerID, "frmContractor")
+    });
+  }).then((obj) => {
+    resarr.Manufacturer = obj
+    return InfoCountry(resarr.Manufacturer.CountryIDInfo).then((value) => {
+      resarr.Manufacturer.CountryInfo = value
+    })
+
+  }).then(() => {
+    resarr.AutName = document.querySelector('.admin-menu a').innerHTML
+    return browser.storage.local.set({
+      tempDoc: resarr
+    })
+  }).then(() => {
+    var allmsg = [{
+      message: "Данные : " + document.querySelector('#Id').value + " документа загружены в память",
+      class: "success"
+    }]
+    return allmsg
+  })
 }
 
 function PostForm(data) {
@@ -226,7 +263,6 @@ function PostForm(data) {
       var item = eArr.next().value
       resarr[item[0]] = item[1]
     })
-    console.log(resarr);
     return fetch(form.action, {
       method: 'POST',
       credentials: 'include',
@@ -296,12 +332,12 @@ function PostForm(data) {
       obj.LegalFormID = id
     }).then(() => {
       obj._location = _locationDetected(obj.CountryID)
-      console.log(obj.CountryID);
+
       return CountriID(obj.CountryID).then((id) => {
         obj.CountryID = id
       })
     }).then(() => {
-      console.log(obj.CountryID);
+
       return RegionID(obj.RegionID).then((id) => {
         obj.RegionID = id
       })
@@ -316,7 +352,7 @@ function PostForm(data) {
     }).then(() => {
       return SetContractor(obj)
     }).then((ret) => {
-      console.log(ret);
+
       frmd.set("ManufacturerTitle", ret.Title)
       frmd.set("ManufacturerInfo", ret.Info)
       frmd.set("CountryId", ret.CountryId)
@@ -489,7 +525,7 @@ function PostForm(data) {
         return response.json()
       });
     }).then((ret) => {
-      console.log(ret);
+
       ret.id = _id
       return ret
     })
@@ -563,7 +599,6 @@ function PostForm(data) {
 
     return Promise.resolve().then(() => {
       var d = new FormData();
-      console.log("!!!!!!!!!!!!!!!!!!!!!", obj);
       switch (obj._location) {
         case "Foreign":
           d.append("Active", true);
@@ -624,7 +659,6 @@ function PostForm(data) {
       }).then((response) => {
         return response.text()
       }).then(text => {
-        console.log(text);
         parser = new DOMParser();
         doc = parser.parseFromString(text, "text/html");
         if (doc.querySelector('.alert.alert-danger')) {
@@ -638,7 +672,6 @@ function PostForm(data) {
 
 
   function GetContractor(obj) {
-    console.log("GetContractor!!!!!!!!!!!!", obj);
     var url = ""
     var str = ""
     var obj = obj
@@ -663,11 +696,9 @@ function PostForm(data) {
       return response.json()
     }).then((data) => {
       if (data.length > 0) {
-        console.log("return", data[0].id);
         return data[0].id;
       } else {
         return AddContractor(obj).then((id) => {
-          console.log("return", id);
           return id
         })
       }

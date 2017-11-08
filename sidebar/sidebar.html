@@ -17,26 +17,48 @@
 </head>
 
 <body>
-  <!-- <div data-preset="stripe" class="ldBar label-center" data-value="100"></div> -->
+  <!-- <p>
+    <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+      Link with href
+    </a>
+    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+      Button with data-target
+    </button>
+  </p>
+  <div class="collapse" id="collapseExample">
+    <div class="card card-block">
+      <div class="btn-group-vertical" role="group" aria-label="...">
+        <button id="FocusUp" type="button" class="btn btn-info"><i class="glyphicon glyphicon-arrow-up" aria-hidden="true"></i> Наверх</button>
+        <button id="Save" type="button" disabled="disabled" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></i> Сохранить</button>
+
+        <div class=""> Экспорт экселя </div>
+        <input id="file-input" accept=".xlsx" name="file" type="file"></input> <label for="file-input" type="button" class="btn btn-primary"><i class="glyphicon glyphicon-folder-open" aria-hidden="true"></i>&nbsp; Выберете файл</label>
+        <div id="file-name1">Имя:</div>
+        <div id="file-size1" style="margin-bottom:5px">Размер:</div>
+        <button type="button" id="start_load" class="btn btn-success"><i class="glyphicon glyphicon-download-alt" aria-hidden="true"></i> Загрузить</button>
+      </div>
+    </div>
+  </div> -->
+
   <div class="btn-group-vertical" role="group" aria-label="...">
     <button id="FocusUp" type="button" class="btn btn-info"><i class="glyphicon glyphicon-arrow-up" aria-hidden="true"></i> Наверх</button>
     <button id="Save" type="button" disabled="disabled" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></i> Сохранить</button>
 
-    <div class="ldBar"></div>
+    <div class=""> Экспорт экселя </div>
     <input id="file-input" accept=".xlsx" name="file" type="file"></input> <label for="file-input" type="button" class="btn btn-primary"><i class="glyphicon glyphicon-folder-open" aria-hidden="true"></i>&nbsp; Выберете файл</label>
     <div id="file-name1">Имя:</div>
     <div id="file-size1" style="margin-bottom:5px">Размер:</div>
     <button type="button" id="start_load" class="btn btn-success"><i class="glyphicon glyphicon-download-alt" aria-hidden="true"></i> Загрузить</button>
   </div>
 
-
-  <div>
-
-
-    <button type="button" id="testget" class="btn btn-success"><i class="glyphicon glyphicon-cloud-download" aria-hidden="true"></i> Load Getnumber</button>
-
-    <button type="button" id="LoadTemp" class="btn btn-success"><i class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></i> Upload Advance</button>
+  <div class="btn-group-vertical" role="group" aria-label="...">Протоколы:
+    <button type="button" id="LoadTemp" class="btn btn-success"><i class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></i> из Адванса</button>
+    <button type="button" id="testget" class="btn btn-info"><i class="glyphicon glyphicon-cloud-download" aria-hidden="true"></i> в GetNubmer</button>
+    <button type="button" id="geloisLoad" class="btn btn-info"><i class="glyphicon glyphicon-cloud-download" aria-hidden="true"></i> в Gelios</button>
   </div>
+
+
+
   <div id="message-container" class="margin-container">
   </div>
 

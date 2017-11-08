@@ -89,6 +89,12 @@
         }
       }).catch((err) => {
         console.log(err.message);
+        if (err.message == "Argument 1 of FormData.constructor is not an object.") {
+          AddMessage([{
+            message: "Проверьте авторизацию адванса!",
+            class: "danger"
+          }])
+        }
       })
     })
 
@@ -106,6 +112,19 @@
       })
     })
 
+    document.querySelector('#geloisLoad').addEventListener("click", (e) => {
+      return browser.tabs.query({
+        currentWindow: true,
+        active: true
+      }).then((tabs) => {
+        return browser.tabs.sendMessage(
+          tabs[0].id,
+          Object.assign({}, {
+            action: "geloisLoad"
+          })
+        )
+      })
+    })
 
     document.querySelector('#FocusUp').addEventListener("click", (e) => {
       return browser.tabs.query({
