@@ -20,17 +20,12 @@ function Reglaments(str) {
       return item
     }
   })
-
   if (i.length >= 1) {
     return i
   } else {
-
     return ""
   }
 }
-
-
-
 
 function testget() {
   function ApplicantCountryIdContainer(str) {
@@ -52,7 +47,6 @@ function testget() {
         return item
       }
     })
-
     if (i.length >= 1) {
       return i[0].id
     } else {
@@ -62,7 +56,6 @@ function testget() {
 
   function loadelement(id, value) {
     var i = document.querySelector('#' + id)
-
     if (i) {
       console.log(i.type);
       if (value == undefined) {
@@ -77,8 +70,6 @@ function testget() {
           i.value = value
           i.innerHTML = value
       }
-
-
     }
   }
 
@@ -105,7 +96,6 @@ function testget() {
     loadelement("RequestLab", true)
     document.querySelector('#RequestLab').parentElement.click()
 
-
     loadelement("ManufacturerAddress", temdoc.Manufacturer.Address)
     loadelement("ManufacturerTitle", temdoc.Manufacturer.Title)
     loadelement("ProductInfo", temdoc.ProductInfo)
@@ -114,7 +104,6 @@ function testget() {
 
     var it = temdoc.ReglamentsText.match(/([0-9]{3}\/[0-9]{4})/ig)
     SetReg(it)
-
     function SetReg(arr) {
       var result = ""
       var status = false

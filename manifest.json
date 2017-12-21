@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Импорт экселя в Адванс",
-  "version": "2.0",
+  "version": "2.3",
 
   "description": "Плагин позволяет импортировать данные из шаблона Excel в форму Advance",
 

@@ -26,7 +26,17 @@ function geloisLoad() {
     // Продукция
     ChangeValue("TBnameproduct", temdoc.ProductInfo)
     // Описание типового образца
-    ChangeValue("TBproducttypename", temdoc.ProductIdentification)
+
+    let tp = temdoc.ProductIdentification
+
+    if (!tp.includes("тип") && !tp.includes("модель") && !tp.includes("артикул") ) {
+      var i = Math.floor(Math.random() * (100 - 1 + 1)) + 1
+      ChangeValue("TBproducttypename", temdoc.ProductIdentification + ", артикул " + i)
+    } else {
+      ChangeValue("TBproducttypename", temdoc.ProductIdentification)
+    }
+
+
     // Количество образцов ProductIdentification
     ChangeValue("TBactkol", "3")
     // ТР ТС, ГОСТ и т.п.

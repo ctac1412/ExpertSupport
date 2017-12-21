@@ -25,6 +25,29 @@ function StartObserver() {
   // create an observer instance
   var observer = new MutationObserver((mutations) => {
     CheckBtn()
+
+//     function _new_a(){
+//       alert("111")
+//     }
+//
+// var new_a_parent = document.querySelector('a.text-link[data-updateprotocols]')
+// if (new_a_parent && !document.querySelector('#doc2me')){
+//   var new_a=document.querySelector('a.text-link[data-updateprotocols]').cloneNode(true)
+//   new_a.innerHTML= '<small class="item-text">Запросить из doc2me</small>'
+//   new_a.removeAttribute('data-updateprotocols')
+//   new_a.id = "doc2me"
+//   new_a.onclick=_new_a
+//   var new_select=document.createElement("selection");
+//   new_select.id = "doc2me_select"
+//   new_select.innerHTML=`<OPTION  VALUE="0">Выбираем любимый фрукт</OPTION>
+//   <OPTION SELECTED VALUE="1">Абрикос</OPTION>
+//   <OPTION VALUE="2">Персик</OPTION>
+//   <OPTION VALUE="3">Слива</OPTION>
+//   <OPTION VALUE="7">Груша</OPTION>`
+//   document.querySelector('a.text-link[data-updateprotocols]').parentElement.appendChild(new_a)
+//   document.querySelector('#AcceptanceReason').parentElement.appendChild(new_select)
+//   }
+
   });
   // configuration of the observer:
   var config = {
@@ -137,7 +160,7 @@ function LoadTemp() {
       })
       resarr.CountryIDInfo = doc.querySelector("#CountryID").selectedOptions[0].innerHTML
       var i = doc.querySelector("#RegionID")
-      if (i !== null) {
+      if (i !== null && i.value !=="") {
         return fetch("https://" + DomenUrl + ".advance-docs.ru/Region/Show?id=" + i.value, {
           method: 'GET',
           credentials: 'include'
