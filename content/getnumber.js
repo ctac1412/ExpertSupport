@@ -94,17 +94,26 @@ function testget() {
     return FormtoObject(form)
   }).then((obj) => {
     loadelement("RequestLab", true)
+    console.log('0001-------------');
     document.querySelector('#RequestLab').parentElement.click()
-
+    console.log('0002-------------');
     loadelement("ManufacturerAddress", temdoc.Manufacturer.Address)
+    console.log('0003-------------');
     loadelement("ManufacturerTitle", temdoc.Manufacturer.Title)
+    console.log('0004-------------');
     loadelement("ProductInfo", temdoc.ProductInfo)
-    loadelement("ManufacturerCountryIdContainer", ApplicantCountryIdContainer(temdoc.Manufacturer.CountryInfo))
+    console.log('0005-------------');
+    loadelement("ManufacturerCountryIdContainer",ApplicantCountryIdContainer(temdoc.Manufacturer.CountryInfo))
+    console.log('0006-------------');
     loadelement("RequestLabIndicators", "по определяющим показателям")
-
+    console.log('0007-------------');
     var it = temdoc.ReglamentsText.match(/([0-9]{3}\/[0-9]{4})/ig)
+    console.log('0007)_1--------------');
     SetReg(it)
+    console.log('0008-------------');
     function SetReg(arr) {
+      console.log(arr);
+      if (!arr){return }
       var result = ""
       var status = false
       var dc = document.querySelectorAll('#ReglamentIdsContainer option')
@@ -112,7 +121,7 @@ function testget() {
         status == false
 
 
-        dc.forEach((item, index) => {
+          dc.forEach((item, index) => {
           var txt = item.innerHTML.match(/([0-9]{3}\/[0-9]{4})/ig)
           if (txt.length > 0) {
             if (txt[0] == arr[i]) {
@@ -141,7 +150,7 @@ function testget() {
       default:
         loadelement("Location", "Local")
     }
-
+    console.log('0009-------------');
 
     obj.ApplicantOGRN = temdoc.Applicant["OGRN"]
     obj.ApplicantOGRNIP = temdoc.Applicant["OGRNIP"]
@@ -163,6 +172,8 @@ function testget() {
     var region = ""
     switch (temdoc.typeDocument) {
       case "СС ТР ЕАЭС":
+      case "СС ГОСТ Р":
+
         var e = document.querySelector('#Customer');
         if (e !== null && e.options[e.selectedIndex].innerHTML !== "Орган по сертификации") {
           alert("Тип документа сертификат, а заказчик испытаний не 'Орган по сертификации'. В заявителя будет будет выгружены данные органа")
@@ -181,6 +192,8 @@ function testget() {
         region = "Москва"
         break;
       case "ДС ТР ЕАЭС":
+      case "ДС ГОСТ Р":
+
         obj.DocType = "Declaration"
         document.querySelectorAll('.b-tab-content-inner .styled-radio.styledRadio')[0].click()
         loadelement("DocType", "Declaration")

@@ -5,6 +5,236 @@ function runtimeMessageSend(obj) {
   browser.runtime.sendMessage(obj)
 }
 StartObserver()
+StartObserverLabs()
+function get_labs(){
+  var i = document.querySelector('#AcceptanceReason')
+
+  console.log(  i && !document.querySelector('.custom_labs'));
+
+  if (i && !document.querySelector('.custom_labs')) {
+    console.log(document.querySelector('.custom_labs'));
+    var parent = i.parentNode
+    var clone = parent.querySelector(".row").cloneNode(true);
+    var a = clone.querySelector(".text-link")
+    function test() {
+      var cstp=''
+      LoadTemp().then(()=>{
+        return browser.storage.local.get("cstp")
+      }).then((i)=>{
+        cstp=i.cstp
+        return  browser.storage.local.get("tempDoc")
+      }).then(data=>{
+      var tempDoc= data.tempDoc
+      console.log(data);
+      let lab_id = document.querySelector('#lab_select').value
+      let prod_nd_id = document.querySelector('#nd_select').value
+      let partner_type = (tempDoc.Applicant.SubjectType == 'LegalEntity')?'partner':'partner_ip'
+
+      if (tempDoc.Applicant.EnterpreneurType=="Enterpreneur"){
+        tempDoc.Applicant.Title= 'Индивидуальный предприниматель ' + tempDoc.Applicant.Title
+      } else if (tempDoc.Applicant.EnterpreneurType=="Private") {
+        tempDoc.Applicant.Title= 'Частный предприниматель ' + tempDoc.Applicant.Title
+      } else if (tempDoc.Applicant.EnterpreneurType=="Farm") {
+        tempDoc.Applicant.Title= 'Глава крестьянского (фермерского) хозяйства ' + tempDoc.Applicant.Title
+      }
+      console.log(cstp);
+      d = {
+        'key': cstp , // sequrity key
+
+        'lab_id': lab_id,
+        'prod_nd_id': prod_nd_id,
+        'partner_type': partner_type, // yur lico
+        // ApplicantType
+        // Variants for partner type
+        // partner
+        // partner_cert_organ
+        // partner_individual
+        // partner_ip
+        // partner_foreign
+        // partner_cert_organ
+        // partner_provider
+
+
+        'req_partner_name': tempDoc.Applicant.Title,
+
+        'req_ogrn': (tempDoc.Applicant['OGRN'])?tempDoc.Applicant['OGRN']:tempDoc.Applicant['OGRNIP'],
+        'req_fio_head': tempDoc.Applicant.DirectorName,
+        'req_fio_head_rod_pad': tempDoc.Applicant.DirectorNameGenitive,
+        'req_fio_head_dat_pad': tempDoc.Applicant.DirectorNameDative,
+        // 'req_head_doc': false,
+
+        //ip
+        // 'req_inn':
+        // 'req_nomer_documenta_o_reg':
+        //
+        // // Individual
+        // 'req_passport_seria':
+        // 'req_passport_num':
+        // 'req_vidano':
+        // 'req_data_vidachi':
+        // 'req_kod_podrazdeleniya':
+        //
+        // // cert block
+        // 'req_cert_reg_number':
+        // 'req_cert_reg_date':
+
+        'req_address': tempDoc.Applicant.Address,
+        'req_country': tempDoc.Applicant.CountryIDInfo,
+        'req_region':  tempDoc.Applicant.RegionIDInfo,
+        'req_phone': tempDoc.Applicant.Phone,
+        'req_email': tempDoc.Applicant.Email,
+        'req_faxnum': tempDoc.Applicant.Fax,
+
+
+        // 'doc_execution': false,
+        // 'doc_exec_decl': false,
+        // 'doc_exec_cert': false,
+        // 'doc_exec_other': false,
+        // 'doc_exec_notes':  '',
+        //
+        // 'provesti_otbor_obrazcov': false,
+        // 'provesti_lab_research': false,
+        // 'vidat_expert_conclusion': false,
+        //
+        // 'do_different': false,
+        // 'different_descr':  '',
+        // 'addres_otbor':  '',
+
+        'product_type': (tempDoc.Manufacturer.CountryInfo=="RU")?'local':'import', // 'import' , 'local'
+        'product_name': tempDoc.ProductInfo,
+        'product_info': tempDoc.ProductIdentification,
+
+        // 'tnved_ids': [],
+        // 'example_counts': '',
+        // 'expert_results': '',
+
+
+        'izgotovitel_name': tempDoc.Manufacturer.Title,
+        'izgotovitel_address': tempDoc.Manufacturer.Address,
+        'izgotovitel_phone': tempDoc.Manufacturer.Phone,
+        'izgotovitel_email': tempDoc.Manufacturer.Email,
+
+
+
+        'v_sootvetstvii_s': tempDoc.Accordingly,
+        'perechen_documentov': '',
+      };
+
+        fetch("http://172.16.20.14:5002/requests",{
+          method : 'POST',
+          credentials : 'include',
+          body : JSON.stringify(d),
+          headers: new Headers({
+          'Content-Type': 'application/json'
+      })
+      }).then((response)=>{
+        console.log('done');
+        console.log(response);
+        return response.json()
+      }).then(obj=>{
+        if (obj.request.protocol_num){
+          document.querySelector('#AcceptanceReason').value = obj.request.protocol_num
+        }
+
+      })
+
+    })
+    }
+    function add_option(select) {
+     fetch("http://172.16.20.14:5002/labs", {
+        method: 'GET',
+        credentials: 'include'
+      }).then((response) => {
+        return response.json()
+      }).then(obj => {
+          if (obj.labs){ obj.labs.forEach(item=>{
+          let option = document.createElement("option");
+          option.text = item.name
+          option.value = item.id
+          select.add(option, select[0])
+        })
+        }
+      }).catch((e)=>{
+        console.log(e);
+      })
+    }
+
+    a.removeAttribute('data-updateprotocols')
+    a.innerText = 'Взять протокол'
+    a.onclick = test
+
+    // parent.insertBefore(clone, parent.children[1]);
+    add_div_nd()
+    add_div_labs()
+    function labs_change(){
+      let nd_element = document.querySelector('#nd_select')
+      if (nd_element){
+        nd_element.innerHTML=''
+        fetch("http://172.16.20.14:5002/labs", {
+           method: 'GET',
+           credentials: 'include'
+         }).then((response) => {
+           return response.json()
+         }).then(obj => {
+            let lab = obj.labs.find(function(item) {
+              if (item.id == document.querySelector('#lab_select').value){
+                return true
+              }
+            })
+            if (lab){
+              if (lab.prod_nd){ lab.prod_nd.forEach(item=>{
+              let option = document.createElement("option");
+              option.text = item.name
+              option.value = item.id
+              nd_element.add(option, nd_element[0])
+            })
+          }}
+         }).catch((e)=>{
+           console.log(e);
+         })
+      }
+    }
+    function add_div_labs() {
+      let n_div = document.createElement("div");
+      n_div.className = "row custom_labs";
+      let sub_div = document.createElement("div");
+      sub_div.className = "col-xs-8";
+      sub_div.innerHTML = '<label><strong>Лаборатория испытаний:</strong></label>'
+      let sub_sel = document.createElement("select");
+      sub_sel.onchange = labs_change
+      sub_sel.id = 'lab_select';
+      sub_sel.className = "col-xs-12 b-space-xs";
+
+      add_option(sub_sel)
+      n_div.appendChild(sub_div);
+      n_div.appendChild(sub_sel);
+      parent.insertBefore(n_div, parent.children[1]);
+      labs_change()
+    }
+
+    function add_div_nd() {
+      let n_div = document.createElement("div");
+      n_div.className = "row";
+      let sub_div = document.createElement("div");
+      sub_div.className = "col-xs-8";
+      sub_div.innerHTML = '<label><strong>Выбор НД:</strong></label>'
+      let sub_sel = document.createElement("select");
+      sub_sel.id = 'nd_select';
+      sub_sel.className = "col-xs-12 b-space-xs";
+
+      n_div.appendChild(sub_div);
+      n_div.appendChild(sub_sel);
+      n_div.innerHTML += `<div class="col-xs-4 pull-right">
+      <a id="custom_take_lab" class="text-link" href="javascript:void(0)">Взять протокол</a>
+      </div>`
+      parent.insertBefore(n_div, parent.children[1]);
+
+      document.querySelector('#custom_take_lab').onclick=test
+    }
+
+  }
+
+}
 
 function CheckBtn() {
   if (document.querySelector('#btnSave')) {
@@ -18,35 +248,15 @@ function CheckBtn() {
       action: "SaveOff"
     })
   }
-}
 
+
+}
 function StartObserver() {
   var target = document.querySelector('.wrapper');
+
   // create an observer instance
   var observer = new MutationObserver((mutations) => {
     CheckBtn()
-
-//     function _new_a(){
-//       alert("111")
-//     }
-//
-// var new_a_parent = document.querySelector('a.text-link[data-updateprotocols]')
-// if (new_a_parent && !document.querySelector('#doc2me')){
-//   var new_a=document.querySelector('a.text-link[data-updateprotocols]').cloneNode(true)
-//   new_a.innerHTML= '<small class="item-text">Запросить из doc2me</small>'
-//   new_a.removeAttribute('data-updateprotocols')
-//   new_a.id = "doc2me"
-//   new_a.onclick=_new_a
-//   var new_select=document.createElement("selection");
-//   new_select.id = "doc2me_select"
-//   new_select.innerHTML=`<OPTION  VALUE="0">Выбираем любимый фрукт</OPTION>
-//   <OPTION SELECTED VALUE="1">Абрикос</OPTION>
-//   <OPTION VALUE="2">Персик</OPTION>
-//   <OPTION VALUE="3">Слива</OPTION>
-//   <OPTION VALUE="7">Груша</OPTION>`
-//   document.querySelector('a.text-link[data-updateprotocols]').parentElement.appendChild(new_a)
-//   document.querySelector('#AcceptanceReason').parentElement.appendChild(new_select)
-//   }
 
   });
   // configuration of the observer:
@@ -55,8 +265,34 @@ function StartObserver() {
     subtree: true
   }
   // pass in the target node, as well as the observer options
-  observer.observe(target, config);
+
+  if (target) {
+    console.log('Start observer');
+    observer.observe(target, config);
+  }
+
 }
+function StartObserverLabs() {
+  var target = document.querySelector('.wrapper');
+  // create an observer instance
+  var observer = new MutationObserver((mutations) => {
+    get_labs()
+
+  });
+  // configuration of the observer:
+  var config = {
+    childList: true,
+    subtree: true
+  }
+  // pass in the target node, as well as the observer options
+
+  if (target) {
+    console.log('Start observer');
+    observer.observe(target, config);
+  }
+
+}
+
 
 
 
@@ -68,25 +304,13 @@ function listener(request) {
         return PostForm(request.fullObj)
       }).then(() => {
         var allmsg = []
-        allmsg.push({
-          message: "загрузка прошла успешно",
-          class: "success"
-        })
-        allmsg.push({
-          message: "ТН ВЭД не были выгруженны.",
-          class: "warning"
-        })
-        allmsg.push({
-          message: "Филиалы не были выгруженны",
-          class: "warning"
-        })
+        allmsg.push({message: "загрузка прошла успешно", class: "success"})
+        allmsg.push({message: "ТН ВЭД не были выгруженны.", class: "warning"})
+        allmsg.push({message: "Филиалы не были выгруженны", class: "warning"})
         return Promise.resolve(allmsg);
       }).catch(err => {
         var allmsg = []
-        allmsg.push({
-          message: err.message,
-          class: "danger"
-        })
+        allmsg.push({message: err.message, class: "danger"})
         return Promise.resolve(allmsg);
       })
     case "FocusUp":
@@ -105,11 +329,7 @@ function listener(request) {
   }
 }
 
-
-
-function InfoRegion() {
-
-}
+function InfoRegion() {}
 
 function InfoCountry(CountryIDInfo) {
   d = new FormData();
@@ -160,7 +380,7 @@ function LoadTemp() {
       })
       resarr.CountryIDInfo = doc.querySelector("#CountryID").selectedOptions[0].innerHTML
       var i = doc.querySelector("#RegionID")
-      if (i !== null && i.value !=="") {
+      if (i !== null && i.value !== "") {
         return fetch("https://" + DomenUrl + ".advance-docs.ru/Region/Show?id=" + i.value, {
           method: 'GET',
           credentials: 'include'
@@ -185,7 +405,6 @@ function LoadTemp() {
   })
   resarr.typeDocument = document.querySelector('.col-xs-14 input.form-control').value
   resarr.nameOrgan = document.querySelector('.col-xs-19 input.form-control').value
-
 
   return fetch("https://" + DomenUrl + ".advance-docs.ru/Agency", {
     method: 'GET',
@@ -241,14 +460,14 @@ function LoadTemp() {
 
   }).then(() => {
     resarr.AutName = document.querySelector('.admin-menu a').innerHTML
-    return browser.storage.local.set({
-      tempDoc: resarr
-    })
+    return browser.storage.local.set({tempDoc: resarr})
   }).then(() => {
-    var allmsg = [{
-      message: "Данные : " + document.querySelector('#Id').value + " документа загружены в память",
-      class: "success"
-    }]
+    var allmsg = [
+      {
+        message: "Данные : " + document.querySelector('#Id').value + " документа загружены в память",
+        class: "success"
+      }
+    ]
     return allmsg
   })
 }
@@ -278,7 +497,6 @@ function PostForm(data) {
     }
   })
 
-
   return PrepareData(data).then(() => {
     var eArr = frmd.entries();
     var resarr = {}
@@ -301,7 +519,6 @@ function PostForm(data) {
     $("#footer_content").hide();
   })
 
-
   function PrepareData(data) {
     return Promise.resolve().then(() => {
       return SetApplicant(data.Applicant)
@@ -311,7 +528,6 @@ function PostForm(data) {
       return SetOther(data)
     })
   }
-
 
   function SetApplicant(data) {
     var obj = data
@@ -416,8 +632,6 @@ function PostForm(data) {
     return result
   }
 
-
-
   function schemaid(str) {
     var str = str.match(/(^[0-9]{1})/gi)[0]
     if (!window.schemaid || window.schemaid.length == 0) {
@@ -425,7 +639,7 @@ function PostForm(data) {
       document.querySelectorAll('#SchemaID option').forEach(item => {
         window.schemaid.push({
           id: item.value,
-          text: item.innerHTML.replace(/([^0-9]{1})/gi, ''),
+          text: item.innerHTML.replace(/([^0-9]{1})/gi, '')
         })
       })
     }
@@ -446,10 +660,7 @@ function PostForm(data) {
     if (!window.ApplicantType || window.ApplicantType.length == 0) {
       window.ApplicantType = []
       document.querySelectorAll('#ApplicantType option').forEach(item => {
-        window.ApplicantType.push({
-          id: item.value,
-          text: item.innerHTML.toLowerCase()
-        })
+        window.ApplicantType.push({id: item.value, text: item.innerHTML.toLowerCase()})
       })
     }
 
@@ -470,10 +681,7 @@ function PostForm(data) {
     if (!window.Reglaments || window.Reglaments.length == 0) {
       window.Reglaments = []
       document.querySelectorAll('#ReglamentIdsContainer option').forEach(item => {
-        window.Reglaments.push({
-          id: item.value,
-          text: item.innerHTML
-        })
+        window.Reglaments.push({id: item.value, text: item.innerHTML})
       })
     }
 
@@ -507,7 +715,6 @@ function PostForm(data) {
     data.Reglaments.forEach((item, index) => {
       if (item !== "нет") {
 
-
         var res = Reglaments(item)[0]
         if (res !== undefined) {
           frmd.append("ReglamentIdsContainer", parseInt(res.id, 10))
@@ -527,7 +734,6 @@ function PostForm(data) {
         frmd.set(key, data.Other[key])
       }
     })
-
 
   }
 
@@ -693,7 +899,6 @@ function PostForm(data) {
     })
   }
 
-
   function GetContractor(obj) {
     var url = ""
     var str = ""
@@ -743,154 +948,43 @@ function LegalFormID(str) {
   }
   if (!window.legarray) {
     window.legarray = []
-    window.legarray.push({
-      name: "Общество с ограниченной ответственностью",
-      id: "1"
-    })
-    window.legarray.push({
-      name: "Общество с дополнительной ответственностью",
-      id: "2"
-    })
-    window.legarray.push({
-      name: "Открытое акционерное общество",
-      id: "3"
-    })
-    window.legarray.push({
-      name: "Закрытое акционерное общество",
-      id: "4"
-    })
-    window.legarray.push({
-      name: "Акционерное общество",
-      id: "5"
-    })
-    window.legarray.push({
-      name: "Учреждение",
-      id: "6"
-    })
-    window.legarray.push({
-      name: "Государственная корпорация",
-      id: "7"
-    })
-    window.legarray.push({
-      name: "Государственная компания",
-      id: "8"
-    })
-    window.legarray.push({
-      name: "Прочая некоммерческая организация",
-      id: "9"
-    })
-    window.legarray.push({
-      name: "Объединение юридических лиц (ассоциация или союз)",
-      id: "10"
-    })
-    window.legarray.push({
-      name: "Некоммерческое партнерство",
-      id: "11"
-    })
-    window.legarray.push({
-      name: "Автономная некоммерческая организация",
-      id: "12"
-    })
-    window.legarray.push({
-      name: "Представительство или филиал",
-      id: "13"
-    })
-    window.legarray.push({
-      name: "Индивидуальный предприниматель",
-      id: "14"
-    })
-    window.legarray.push({
-      name: "Автономное учреждение",
-      id: "15"
-    })
-    window.legarray.push({
-      name: "Бюджетное учреждение",
-      id: "16"
-    })
-    window.legarray.push({
-      name: "Унитарное предприятие",
-      id: "17"
-    })
-    window.legarray.push({
-      name: "Производственный кооператив",
-      id: "18"
-    })
-    window.legarray.push({
-      name: "Унитарное предприятие, основанное на праве оперативного управления",
-      id: "19"
-    })
-    window.legarray.push({
-      name: "Унитарное предприятие, основанное на праве хозяйственного ведения",
-      id: "20"
-    })
-    window.legarray.push({
-      name: "Хозяйственное товарищество или общество",
-      id: "21"
-    })
-    window.legarray.push({
-      name: "Полное товарищество",
-      id: "22"
-    })
-    window.legarray.push({
-      name: "Крестьянское (фермерское) хозяйство",
-      id: "23"
-    })
-    window.legarray.push({
-      name: "Товарищество на вере",
-      id: "24"
-    })
-    window.legarray.push({
-      name: "Частное учреждение",
-      id: "25"
-    })
-    window.legarray.push({
-      name: "Садоводческое, огородническое или дачное некоммерческое товарищество",
-      id: "26"
-    })
-    window.legarray.push({
-      name: "Объединение крестьянских (фермерских) хозяйств",
-      id: "27"
-    })
-    window.legarray.push({
-      name: "Орган общественной самодеятельности",
-      id: "28"
-    })
-    window.legarray.push({
-      name: "Территориальное общественное самоуправление",
-      id: "29"
-    })
-    window.legarray.push({
-      name: "Общественная или религиозная организация (объединение)",
-      id: "30"
-    })
-    window.legarray.push({
-      name: "Общественное движение",
-      id: "31"
-    })
-    window.legarray.push({
-      name: "Потребительский кооператив",
-      id: "32"
-    })
-    window.legarray.push({
-      name: "Простое товарищество",
-      id: "33"
-    })
-    window.legarray.push({
-      name: "Фонд",
-      id: "34"
-    })
-    window.legarray.push({
-      name: "Паевой инвестиционный фонд",
-      id: "35"
-    })
-    window.legarray.push({
-      name: "Товарищество собственников жилья",
-      id: "36"
-    })
-    window.legarray.push({
-      name: "Иное неюридическое лицо",
-      id: "38"
-    })
+    window.legarray.push({name: "Общество с ограниченной ответственностью", id: "1"})
+    window.legarray.push({name: "Общество с дополнительной ответственностью", id: "2"})
+    window.legarray.push({name: "Открытое акционерное общество", id: "3"})
+    window.legarray.push({name: "Закрытое акционерное общество", id: "4"})
+    window.legarray.push({name: "Акционерное общество", id: "5"})
+    window.legarray.push({name: "Учреждение", id: "6"})
+    window.legarray.push({name: "Государственная корпорация", id: "7"})
+    window.legarray.push({name: "Государственная компания", id: "8"})
+    window.legarray.push({name: "Прочая некоммерческая организация", id: "9"})
+    window.legarray.push({name: "Объединение юридических лиц (ассоциация или союз)", id: "10"})
+    window.legarray.push({name: "Некоммерческое партнерство", id: "11"})
+    window.legarray.push({name: "Автономная некоммерческая организация", id: "12"})
+    window.legarray.push({name: "Представительство или филиал", id: "13"})
+    window.legarray.push({name: "Индивидуальный предприниматель", id: "14"})
+    window.legarray.push({name: "Автономное учреждение", id: "15"})
+    window.legarray.push({name: "Бюджетное учреждение", id: "16"})
+    window.legarray.push({name: "Унитарное предприятие", id: "17"})
+    window.legarray.push({name: "Производственный кооператив", id: "18"})
+    window.legarray.push({name: "Унитарное предприятие, основанное на праве оперативного управления", id: "19"})
+    window.legarray.push({name: "Унитарное предприятие, основанное на праве хозяйственного ведения", id: "20"})
+    window.legarray.push({name: "Хозяйственное товарищество или общество", id: "21"})
+    window.legarray.push({name: "Полное товарищество", id: "22"})
+    window.legarray.push({name: "Крестьянское (фермерское) хозяйство", id: "23"})
+    window.legarray.push({name: "Товарищество на вере", id: "24"})
+    window.legarray.push({name: "Частное учреждение", id: "25"})
+    window.legarray.push({name: "Садоводческое, огородническое или дачное некоммерческое товарищество", id: "26"})
+    window.legarray.push({name: "Объединение крестьянских (фермерских) хозяйств", id: "27"})
+    window.legarray.push({name: "Орган общественной самодеятельности", id: "28"})
+    window.legarray.push({name: "Территориальное общественное самоуправление", id: "29"})
+    window.legarray.push({name: "Общественная или религиозная организация (объединение)", id: "30"})
+    window.legarray.push({name: "Общественное движение", id: "31"})
+    window.legarray.push({name: "Потребительский кооператив", id: "32"})
+    window.legarray.push({name: "Простое товарищество", id: "33"})
+    window.legarray.push({name: "Фонд", id: "34"})
+    window.legarray.push({name: "Паевой инвестиционный фонд", id: "35"})
+    window.legarray.push({name: "Товарищество собственников жилья", id: "36"})
+    window.legarray.push({name: "Иное неюридическое лицо", id: "38"})
   }
   var i = window.legarray.filter(item => {
     if (item.name.toLowerCase() == str.toLowerCase()) {
@@ -905,10 +999,10 @@ function LegalFormID(str) {
 
 }
 
-// // выбираем целевой элемент
+//  выбираем целевой элемент
 // var target = document.body;
 //
-// // создаём экземпляр MutationObserver
+//  создаём экземпляр MutationObserver
 // var observer = new MutationObserver(function(mutations) {
 //   mutations.forEach(function(mutation) {
 //
@@ -928,12 +1022,12 @@ function LegalFormID(str) {
 //   });
 // });
 //
-// // конфигурация нашего observer:
+//  конфигурация нашего observer:
 // var config = { attributes: true };
-// // передаём в качестве аргументов целевой элемент и его конфигурацию
+//  передаём в качестве аргументов целевой элемент и его конфигурацию
 // observer.observe(target, config);
 //
-// // позже можно остановить наблюдение
+//  позже можно остановить наблюдение
 //
 // function generate()
 // {

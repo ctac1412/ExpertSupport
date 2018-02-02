@@ -65,7 +65,17 @@
   (function() {
     var fileInput = document.getElementById("file-input");
     var btnStart = document.querySelector('#start_load');
+    var input_paswoed = document.querySelector('#password');
 
+    browser.storage.local.get("cstp").then(i=>{
+      console.log(i);
+     if (i.cstp) {
+       input_paswoed.value=i.cstp
+     } else {
+       input_paswoed.value='51cd18aaa30ca5d1397581f9fed6a746'
+       browser.storage.local.set({cstp: '51cd18aaa30ca5d1397581f9fed6a746'})
+     }
+    })
     // var unzipProgress = document.createElement("progress");
     // var fileList = document.getElementById("file-list");
     // var creationMethodInput = document.getElementById("creation-method-input");
@@ -158,6 +168,11 @@
       getFileParam()
       document.querySelector('#message-container').innerHTML = ""
     })
+
+    input_paswoed.addEventListener('change', function(item) {
+      browser.storage.local.set({cstp: input_paswoed.value})
+    }, false);
+
 
     btnStart.addEventListener('click', function() {
       var arrpromise = []

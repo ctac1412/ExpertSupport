@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Импорт экселя в Адванс",
-  "version": "2.3",
+  "version": "2.4",
 
   "description": "Плагин позволяет импортировать данные из шаблона Excel в форму Advance",
 
@@ -28,6 +28,7 @@
       "<all_urls>",
       "*://*.aesthetic.ru/*",
       "*://10.250.4.13/*",
+      "*://172.16.20.14/*",
       "*://*.advance-docs.ru/*",
       "webRequest",
       "webRequestBlocking",
